@@ -8,6 +8,7 @@ namespace ChessConsole.tabuleiro
         public int Colunas { get; set; }
 
         private Peca[,] pecas;
+        public Tabuleiro() { }
 
         public Tabuleiro(int linhas, int colunas)
         {
