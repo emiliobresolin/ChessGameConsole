@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ChessConsole.tabuleiro;
+using System;
 
 namespace ChessConsole
 {
@@ -6,7 +7,9 @@ namespace ChessConsole
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Tabuleiro tab = new Tabuleiro(8, 8);
+            Tela.ImprimirTabuleiro(tab);
+            Console.WriteLine();
         }
     }
 }
