@@ -10,14 +10,20 @@ namespace ChessConsole
         {
             try
             {
-                Tabuleiro tab = new Tabuleiro(8, 8);
+                PartidaChess partida = new PartidaChess();
 
-                tab.ColocarPeca(new Torre(tab, Cor.Preta), new Posicao(0, 0));
-                tab.ColocarPeca(new Torre(tab, Cor.Preta), new Posicao(1, 3));
-                tab.ColocarPeca(new Rei(tab, Cor.Preta), new Posicao(2, 4));
-                tab.ColocarPeca(new Torre(tab, Cor.Branca), new Posicao(3, 5));
+                while (!partida.terminada)
+                {
+                    Console.Clear();
+                    Tela.ImprimirTabuleiro(partida.tab);
+                    Console.Write("ORIGEM: ");
+                    Posicao origem = Tela.lerPosicaoChess().ToPosicao();
+                    Console.Write("DESTINO: ");
+                    Posicao destino = Tela.lerPosicaoChess().ToPosicao();
+                    partida.ExecutaMovimento(origem, destino);
+                }
+
                 //PosicaoChess pos = new PosicaoChess('c', 7);
-                Tela.ImprimirTabuleiro(tab);
             }
             catch (TabuleiroException e)
             {

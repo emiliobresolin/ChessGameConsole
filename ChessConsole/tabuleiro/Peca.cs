@@ -22,5 +22,9 @@ namespace ChessConsole.tabuleiro
             Tab = tab;
             Cor = cor;
         }
+        public void IncrementarQtdMovimentos()
+        {
+            QtdMovimentos++;
+        }
     }
 }
