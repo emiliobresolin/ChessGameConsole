@@ -27,6 +27,7 @@ namespace ChessConsole.chess
         private void ColocarPecas()
         {
             tab.ColocarPeca(new Torre(tab, Cor.Branca), new PosicaoChess('c', 1).ToPosicao());
+            tab.ColocarPeca(new Rei(tab, Cor.Branca), new PosicaoChess('b', 1).ToPosicao());
         }
     }
 }
