@@ -12,17 +12,19 @@ namespace ChessConsole.chess
         public bool terminada { get; private set; }
         private HashSet<Peca> pecas; //conjuntos
         private HashSet<Peca> capturadas; //conjuntos
+        public bool xeque { get; private set; }
         public PartidaChess()
         {
             tab = new Tabuleiro(8, 8);
             turno = 1;
             jogadorAtual = Cor.Branca;
             terminada = false;
+            xeque = false;
             pecas = new HashSet<Peca>();
             capturadas = new HashSet<Peca>();
             ColocarPecas();
         }
-        public void ExecutaMovimento(Posicao origem, Posicao destino)
+        public Peca executaMovimento(Posicao origem, Posicao destino)
         {
             Peca p = tab.RetirarPeca(origem);
             p.IncrementarQtdMovimentos();
@@ -32,10 +34,36 @@ namespace ChessConsole.chess
             {
                 capturadas.Add(pecaCapturada);
             }
+            return pecaCapturada;
+        }
+        public void desfazMovimento(Posicao origem, Posicao destino, Peca pecaCapturada)
+        {
+            Peca p = tab.RetirarPeca(destino);
+            p.DecrementarQtdMovimentos();
+            if (pecaCapturada != null)
+            {
+                tab.ColocarPeca(pecaCapturada, destino);
+                capturadas.Remove(pecaCapturada);
+            }
+            tab.ColocarPeca(p, origem);
         }
         public void realizaJogada(Posicao origem, Posicao destino)
         {
-            ExecutaMovimento(origem, destino);
+            Peca pecaCapturada = executaMovimento(origem, destino);
+            if (estaEmXeque(jogadorAtual))
+            {
+                desfazMovimento(origem, destino, pecaCapturada);
+                throw new TabuleiroException("Voce nao pode mover pois te botaria em posicao de xeque!");
+            }
+            Peca p = tab.peca(destino);
+            if (estaEmXeque(adversaria(jogadorAtual)))
+            {
+                xeque = true;
+            }
+            else
+            {
+                xeque = false;
+            }
             turno++;
             mudaJogador();
         }
@@ -45,7 +73,7 @@ namespace ChessConsole.chess
             {
                 throw new TabuleiroException("Nao existe peca na posicao de origem escolhida!");
             }
-            if (jogadorAtual != tab.peca(pos).Cor)
+            if (jogadorAtual != tab.peca(pos).cor)
             {
                 throw new TabuleiroException("A peca de origem escolhida nao e sua!");
             }
@@ -77,7 +105,7 @@ namespace ChessConsole.chess
             HashSet<Peca> aux = new HashSet<Peca>();
             foreach (Peca x in capturadas)
             {
-                if (x.Cor == cor)
+                if (x.cor == cor)
                 {
                     aux.Add(x);
                 }
@@ -87,15 +115,54 @@ namespace ChessConsole.chess
         public HashSet<Peca> pecasEmJogo (Cor cor)
         {
             HashSet<Peca> aux = new HashSet<Peca>();
-            foreach (Peca x in capturadas)
+            foreach (Peca x in pecas)
             {
-                if (x.Cor == cor)
+                if (x.cor == cor)
                 {
                     aux.Add(x);
                 }
             }
             aux.ExceptWith(pecasCapturadas(cor));
             return aux;
+        }
+        private Peca rei(Cor cor)
+        {
+            foreach (Peca x in pecasEmJogo(cor))
+            {
+                if (x is Rei)
+                {
+                    return x;
+                }
+            }
+            return null;
+        }
+        public bool estaEmXeque(Cor cor)
+        {
+            Peca R = rei(cor);
+            if (R == null)
+            {
+                throw new TabuleiroException("Nao tem rei da cor " + cor + " no tabuleiro!");
+            }
+            foreach (Peca x in pecasEmJogo(adversaria(cor)))
+            {
+                bool[,] mat = x.movimentosPossiveis();
+                if (mat[R.posicao.linha, R.posicao.coluna])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private Cor adversaria(Cor cor)
+        {
+            if (cor == Cor.Branca)
+            {
+                return Cor.Preta;
+            }
+            else
+            {
+                return Cor.Branca;  
+            }
         }
         public void colocarNovaPeca(char coluna, int linha, Peca peca)
         {
