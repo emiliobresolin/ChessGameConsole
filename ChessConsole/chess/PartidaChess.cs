@@ -13,6 +13,7 @@ namespace ChessConsole.chess
         private HashSet<Peca> pecas; //conjuntos
         private HashSet<Peca> capturadas; //conjuntos
         public bool xeque { get; private set; }
+        public Peca vulneravelEnPassante { get; private set; }
         public PartidaChess()
         {
             tab = new Tabuleiro(8, 8);
@@ -20,6 +21,7 @@ namespace ChessConsole.chess
             jogadorAtual = Cor.Branca;
             terminada = false;
             xeque = false;
+            vulneravelEnPassante = null;
             pecas = new HashSet<Peca>();
             capturadas = new HashSet<Peca>();
             ColocarPecas();
@@ -50,7 +52,24 @@ namespace ChessConsole.chess
                 T.decrementarQtdMovimentos();
                 tab.ColocarPeca(T, destinoT);
             }
-            return pecaCapturada;
+            if (p is Peao)
+            {
+                if (origem.coluna != destino.coluna && pecaCapturada == null)
+                {
+                    Posicao posP;
+                    if (p.cor == Cor.Branca)
+                    {
+                        posP = new Posicao(destino.linha + 1, destino.coluna);
+                    }
+                    else
+                    {
+                        posP = new Posicao(destino.linha - 1, destino.coluna);
+                    }
+                    pecaCapturada = tab.RetirarPeca(posP);
+                    capturadas.Add(pecaCapturada);
+                }
+            }
+                return pecaCapturada;
         }
         public void desfazMovimento(Posicao origem, Posicao destino, Peca pecaCapturada)
         {
@@ -78,6 +97,23 @@ namespace ChessConsole.chess
                 T.decrementarQtdMovimentos();
                 tab.ColocarPeca(T, origemT);
             }
+            if (p is Peao)
+            {
+                if (origem.coluna != destino.coluna && pecaCapturada == vulneravelEnPassante)
+                {
+                    Peca peao = tab.RetirarPeca(destino);
+                    Posicao posP;
+                    if (p.cor == Cor.Branca)
+                    {
+                        posP = new Posicao(3, destino.coluna);
+                    }
+                    else
+                    {
+                        posP = new Posicao(4, destino.coluna);
+                    }
+                    tab.ColocarPeca(peao, posP);
+                }
+            }
         }
         public void realizaJogada(Posicao origem, Posicao destino)
         {
@@ -104,6 +140,15 @@ namespace ChessConsole.chess
             {
                 turno++;
                 mudaJogador();
+            }
+            Peca q = tab.peca(destino);
+            if (q is Peao && (destino.linha == origem.linha - 2 || destino.linha == origem.linha + 2))
+            {
+                vulneravelEnPassante = q;
+            }
+            else
+            {
+                vulneravelEnPassante = null;
             }
         }
         public void validarPosicaoOrigem(Posicao pos)
