@@ -123,7 +123,18 @@ namespace ChessConsole.chess
                 desfazMovimento(origem, destino, pecaCapturada);
                 throw new TabuleiroException("Voce nao pode mover pois te botaria em posicao de xeque!");
             }
-            Peca p = tab.peca(destino);
+            Peca q = tab.peca(destino);
+            if (q is Peao)
+            {
+                if ((q.cor == Cor.Branca && destino.linha == 0) || (q.cor == Cor.Preta && destino.linha == 7))
+                {
+                    q = tab.RetirarPeca(destino);
+                    pecas.Remove(q);
+                    Peca dama = new Dama(tab, q.cor);
+                    tab.ColocarPeca(dama, destino);
+                    pecas.Add(dama);
+                }
+            }
             if (estaEmXeque(adversaria(jogadorAtual)))
             {
                 xeque = true;
@@ -141,7 +152,6 @@ namespace ChessConsole.chess
                 turno++;
                 mudaJogador();
             }
-            Peca q = tab.peca(destino);
             if (q is Peao && (destino.linha == origem.linha - 2 || destino.linha == origem.linha + 2))
             {
                 vulneravelEnPassante = q;
